@@ -9,30 +9,25 @@ namespace FileEncryptor{
         {
             byte[] encryptedBytes = null;
 
-            // Set your salt here, change it to meet your flavor:
-            // The salt bytes must be at least 8 bytes.
-            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
-
             using (MemoryStream ms = new MemoryStream())
             {
                 using (RijndaelManaged AES = new RijndaelManaged())
                 {
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
+                    var ivBlockSize = AES.BlockSize / 8;
 
                     Console.WriteLine($"passwordBytes : {passwordBytes.Length}");
                     AES.Key = passwordBytes;
-                    var ivBlockSize = AES.BlockSize / 8;
+                    
                     
                     byte [] keyBytes = new byte[ivBlockSize];
                     for (int i = 0; i < ivBlockSize;i++){
                         keyBytes[i] = passwordBytes[i];
                     }
                     AES.IV = keyBytes;
-                    //AES.Key = key.GetBytes(AES.KeySize / 8);
                     
                     Console.WriteLine($"ivBlockSize : {ivBlockSize}");
-                    //AES.IV = key.GetBytes(ivBlockSize);
 
                     AES.Mode = CipherMode.CBC;
 
@@ -52,21 +47,20 @@ namespace FileEncryptor{
         {
             byte[] decryptedBytes = null;
 
-            // Set your salt here, change it to meet your flavor:
-            // The salt bytes must be at least 8 bytes.
-            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
-
             using (MemoryStream ms = new MemoryStream())
             {
                 using (RijndaelManaged AES = new RijndaelManaged())
                 {
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
+                    var ivBlockSize = AES.BlockSize / 8;
 
-                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
-                    
-                    AES.Key = key.GetBytes(AES.KeySize / 8);
-                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+                    AES.Key = passwordBytes;
+                     byte [] keyBytes = new byte[ivBlockSize];
+                    for (int i = 0; i < ivBlockSize;i++){
+                        keyBytes[i] = passwordBytes[i];
+                    }
+                    AES.IV = keyBytes;
 
                     AES.Mode = CipherMode.CBC;
 
@@ -104,6 +98,28 @@ namespace FileEncryptor{
             //File.WriteAllBytes(fileEncrypted, bytesEncrypted);
             
         }
+
+        public void DecryptFile(string encryptedFile, string password, string decryptedFileExtension)
+        {
+            string base64EncryptedString = File.ReadAllText(encryptedFile);
+            Console.WriteLine(base64EncryptedString);
+            byte[] bytesToBeDecrypted = Convert.FromBase64String(base64EncryptedString);
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+
+            // Hash the password with SHA256
+            passwordBytes = SHA256.Create().ComputeHash(passwordBytes);
+
+            byte[] decryptedBytes = AES_Decrypt(bytesToBeDecrypted, passwordBytes);
+            
+            string decryptedFile = 
+                $"{Path.GetDirectoryName(Path.GetFullPath(encryptedFile))}{Path.DirectorySeparatorChar}{Path.GetFileNameWithoutExtension(encryptedFile)}.dec";
+            if (decryptedFileExtension != String.Empty){
+                decryptedFile += $".{decryptedFileExtension}";
+            }
+            Console.WriteLine($"wrote {decryptedFile}");
+            File.WriteAllBytes(decryptedFile,decryptedBytes);
+        }
+
 
     private string BytesToHex(byte[] bytes) 
     { 
