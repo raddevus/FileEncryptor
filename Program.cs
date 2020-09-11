@@ -6,8 +6,9 @@ namespace FileEncryptor
     {
         static void Main(string[] args)
         {
-            if (args.Length < 1){
-                Console.WriteLine("Need filename of file to encrypt.");
+            if (args.Length < 2){
+                Console.WriteLine("Need filename of file to encrypt and password");
+                Console.WriteLine("Usage: [filename] [password]");
                 return;
             }
             FileEncryptor fe = new FileEncryptor();
@@ -15,7 +16,7 @@ namespace FileEncryptor
             // Console.WriteLine($"clearText: {clearText}");
             Console.WriteLine("Using file for cleartext.");
 
-            fe.EncryptFile(args[0], "a");
+            fe.EncryptFile(args[0], args[1]);
         }
     }
 }
