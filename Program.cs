@@ -6,11 +6,16 @@ namespace FileEncryptor
     {
         static void Main(string[] args)
         {
+            if (args.Length < 1){
+                Console.WriteLine("Need filename of file to encrypt.");
+                return;
+            }
             FileEncryptor fe = new FileEncryptor();
             // String clearText = Convert.ToBase64String(new byte[]{97},0,1);
             // Console.WriteLine($"clearText: {clearText}");
             Console.WriteLine("Using file for cleartext.");
-            fe.EncryptFile("text.cleartext", "a");
+
+            fe.EncryptFile(args[0], "a");
         }
     }
 }

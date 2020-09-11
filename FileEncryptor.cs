@@ -20,13 +20,6 @@ namespace FileEncryptor{
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
 
-                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
-                    //var fakekey = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb";
-                    // byte [] keyBytes = new byte[AES.KeySize/8];
-                    // for (int i = 0; i < AES.KeySize/8;i++){
-                    //     keyBytes[i] = passwordBytes[i];
-                    // }
-                    
                     Console.WriteLine($"passwordBytes : {passwordBytes.Length}");
                     AES.Key = passwordBytes;
                     var ivBlockSize = AES.BlockSize / 8;
@@ -94,18 +87,15 @@ namespace FileEncryptor{
         {
             string file = clearTextFile;
 
-            //byte[] bytesToBeEncrypted = File.ReadAllBytes(file);
-            byte[] bytesToBeEncrypted = {97}; // used to test specific bytes
+            byte[] bytesToBeEncrypted = File.ReadAllBytes(file);
+            //byte[] bytesToBeEncrypted = {97,10}; // used to test specific bytes
             byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
 
             // Hash the password with SHA256
             passwordBytes = SHA256.Create().ComputeHash(passwordBytes);
 
             byte[] bytesEncrypted = AES_Encrypt(bytesToBeEncrypted, passwordBytes);
-            var encryptedBytesHexEncoded = BytesToHex(bytesEncrypted);
-            Console.WriteLine(encryptedBytesHexEncoded);
-            String b64Encrypted = Convert.ToBase64String(Encoding.UTF8.GetBytes(encryptedBytesHexEncoded),0,encryptedBytesHexEncoded.Length);
-            //String b64Encrypted = Convert.ToBase64String(bytesEncrypted,0,bytesEncrypted.Length);
+            String b64Encrypted = Convert.ToBase64String(bytesEncrypted,0,bytesEncrypted.Length);
 
             string fileEncrypted = clearTextFile +  ".enc";
             Console.WriteLine(b64Encrypted);
